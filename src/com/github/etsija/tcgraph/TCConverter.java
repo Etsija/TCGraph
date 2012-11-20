@@ -15,8 +15,9 @@ import javax.swing.JOptionPane;
 
 public class TCConverter {
 
+	
+	// This class represents an edge in the routing graph
 	private static class PathConnection {	
-		
 		public PathConnection(DataInputStream stream, PathNode dest) throws IOException {
 			this.distance = stream.readInt();
 			switch (stream.readByte()) {
@@ -34,18 +35,41 @@ public class TCConverter {
 		public boolean shouldBeListed = true;
 	}
 
+	
+	// This class represents a node in the routing graph
 	private static class PathNode {
-		
 		public String name;
 		public int x, y, z;
 		public String world;
 		public ArrayList<PathConnection> connections = new ArrayList<PathConnection>();
 		public String getLoc() {
-			//return world + "_" + x + "_" + y + "_" + z;
 			return "(" + world + "," + x + "," + y + "," + z + ")";
 		}
 	}
 	
+	
+	// Find and mark the two-way connections
+	private static int markTwoWay(PathNode[] nodes) {
+		int removedNodes = 0;
+		for (PathNode node : nodes) {
+			for (PathConnection sourceConn : node.connections) {
+				PathNode destNode = sourceConn.destination;
+				for (PathConnection destConn : destNode.connections) {
+					if (destConn.destination == node) {
+						if (sourceConn.shouldBeListed) {
+							sourceConn.isTwoway = true;
+							destConn.shouldBeListed = false;
+							removedNodes++;
+						}
+					}
+				}
+			}
+		}
+		return removedNodes;
+	}
+	
+	
+	// Main
 	public static void main(String[] args) {
 		
 		JFileChooser fileChooser = new JFileChooser();
@@ -108,21 +132,9 @@ public class TCConverter {
 					} finally {
 						stream.close();
 					}
-					
-					// Find and mark the two-way connections from the map
-					for (PathNode node : nodes) {
-						for (PathConnection sourceConn : node.connections) {
-							PathNode destNode = sourceConn.destination;
-							for (PathConnection destConn : destNode.connections) {
-								if (destConn.destination == node) {
-									if (sourceConn.shouldBeListed) {
-										sourceConn.isTwoway = true;
-										destConn.shouldBeListed = false;
-									}
-								}
-							}
-						}
-					}
+
+					// Find and mark the two-way connections so they are not drawn twice in the graph
+					int removedNodes = markTwoWay(nodes);
 					
 					for (PathNode node : nodes) {
 						for (PathConnection conn : node.connections) {
@@ -131,6 +143,7 @@ public class TCConverter {
 										+ ", istwoway=" + conn.isTwoway);
 						}
 					}
+					System.out.println(removedNodes + " nodes removed.");
 					
 					// Start writing this info
 					BufferedWriter  writer = new BufferedWriter(new FileWriter(destFile));
@@ -138,10 +151,8 @@ public class TCConverter {
 					BufferedWriter dwriter = new BufferedWriter(new FileWriter(destBase + ".dot"));
 
 					try {
-						//dwriter.write("digraph PathFinding {");
 						dwriter.write("graph PathFinding {");
 						dwriter.newLine();
-						//dwriter.write("    size=\"20\" splines=ortho;");
 						
 						dwriter.newLine();
 						dwriter.write("    node [style=filled, shape=box, fontname=Helvetica, fontsize=14];");
@@ -153,8 +164,9 @@ public class TCConverter {
 							writer.newLine();
 							
 							dwriter.write("    " + node.name + " [");
-							//dwriter.write("pos=\"" + node.x + "," + node.z + "!\"");
 							dwriter.write("pos=\"" + node.x + "," + node.z + "\"");
+							
+							// Switches represented as points in graph, real destinations as yellow boxes
 							if (!node.name.startsWith("JN")) {
 								dwriter.write(", fillcolor=yellow");
 							} else {
@@ -177,14 +189,9 @@ public class TCConverter {
 								if (conn.shouldBeListed) {
 									if (conn.isTwoway) {
 										dwriter.write("    " + node.name + " -- " + conn.destination.name + " [" 
-											      //+ "len=" + conn.distance + ", "
-											      //+ "tailport=" + conn.direction + ", "
-												  //+ "dir=\"both\", "
 											      + "label=" + conn.distance + "];");
 									} else {
 											dwriter.write("    " + node.name + " -- " + conn.destination.name + " ["
-										          //+ "len=" + conn.distance + ", "
-										          //+ "tailport=" + conn.direction + ", "
 												  + "dir=\"forward\", "
 										          + "label=" + conn.distance + ", "
 										          + "color=red];");
