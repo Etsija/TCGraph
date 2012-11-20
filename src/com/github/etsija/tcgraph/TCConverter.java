@@ -30,7 +30,8 @@ public class TCConverter {
 		public PathNode destination;
 		public int distance;
 		public String direction;
-		public boolean istwoway;
+		public boolean isTwoway = false;
+		public boolean shouldBeListed = true;
 	}
 
 	private static class PathNode {
@@ -104,20 +105,31 @@ public class TCConverter {
 							}
 						}
 						
-						// Find and mark the two-way connections from the map
-						for (PathNode node : nodes) {
-							for (PathConnection sourceConn : node.connections) {
-								for (PathConnection destConn : sourceConn.destination.connections) {
-									if (destConn.destination == node) {
-										sourceConn.istwoway = true;
-										destConn.istwoway = true;
+					} finally {
+						stream.close();
+					}
+					
+					// Find and mark the two-way connections from the map
+					for (PathNode node : nodes) {
+						for (PathConnection sourceConn : node.connections) {
+							PathNode destNode = sourceConn.destination;
+							for (PathConnection destConn : destNode.connections) {
+								if (destConn.destination == node) {
+									if (sourceConn.shouldBeListed) {
+										sourceConn.isTwoway = true;
+										destConn.shouldBeListed = false;
 									}
 								}
 							}
 						}
-						
-					} finally {
-						stream.close();
+					}
+					
+					for (PathNode node : nodes) {
+						for (PathConnection conn : node.connections) {
+							if (conn.shouldBeListed)
+								System.out.println(node.name + " -> " + conn.destination.name 
+										+ ", istwoway=" + conn.isTwoway);
+						}
 					}
 					
 					// Start writing this info
@@ -126,9 +138,11 @@ public class TCConverter {
 					BufferedWriter dwriter = new BufferedWriter(new FileWriter(destBase + ".dot"));
 
 					try {
-						dwriter.write("digraph PathFinding {");
+						//dwriter.write("digraph PathFinding {");
+						dwriter.write("graph PathFinding {");
 						dwriter.newLine();
-						dwriter.write("    size=\"20\" splines=ortho;");
+						//dwriter.write("    size=\"20\" splines=ortho;");
+						
 						dwriter.newLine();
 						dwriter.write("    node [style=filled, shape=box, fontname=Helvetica, fontsize=14];");
 						dwriter.newLine();
@@ -160,19 +174,23 @@ public class TCConverter {
 								writer.write(conn.destination.name);
 								writer.newLine();
 								
-								if (conn.istwoway) {
-									dwriter.write("    " + node.name + " -> " + conn.destination.name + " [" 
+								if (conn.shouldBeListed) {
+									if (conn.isTwoway) {
+										dwriter.write("    " + node.name + " -- " + conn.destination.name + " [" 
 											      //+ "len=" + conn.distance + ", "
-											      + "headport=" + conn.direction + ", "
+											      //+ "tailport=" + conn.direction + ", "
+												  //+ "dir=\"both\", "
 											      + "label=" + conn.distance + "];");
-								} else {
-									dwriter.write("    " + node.name + " -> " + conn.destination.name + " ["
+									} else {
+											dwriter.write("    " + node.name + " -- " + conn.destination.name + " ["
 										          //+ "len=" + conn.distance + ", "
-										          + "headport=" + conn.direction + ", "
+										          //+ "tailport=" + conn.direction + ", "
+												  + "dir=\"forward\", "
 										          + "label=" + conn.distance + ", "
 										          + "color=red];");
+									}
+									dwriter.newLine();
 								}
-								dwriter.newLine();
 								
 								writer.write("    position: ");
 								writer.write(conn.destination.getLoc());
