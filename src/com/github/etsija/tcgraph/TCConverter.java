@@ -14,7 +14,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 public class TCConverter {
-
 	
 	// This class represents an edge in the routing graph
 	private static class PathConnection {	
@@ -74,6 +73,7 @@ public class TCConverter {
 		
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("Select the destinations.dat file to open");
+		fileChooser.setCurrentDirectory(new File("."));
 		
 		if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			File sourceFile = fileChooser.getSelectedFile();
