@@ -164,7 +164,9 @@ public class TCConverter {
 							writer.newLine();
 							
 							dwriter.write("    " + node.name + " [");
-							dwriter.write("pos=\"" + node.x + "," + node.z + "\"");
+							// Flip the z coordinate to make the graphics roughly respect the
+							// real directions (n,e,s,w)
+							dwriter.write("pos=\"" + node.x + "," + -node.z + "\"");
 							
 							// Switches represented as points in graph, real destinations as yellow boxes
 							if (!node.name.startsWith("JN")) {
