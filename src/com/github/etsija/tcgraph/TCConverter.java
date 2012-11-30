@@ -10,8 +10,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.InflaterInputStream;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
 
 public class TCConverter {
 	
@@ -71,9 +76,21 @@ public class TCConverter {
 	// Main
 	public static void main(String[] args) {
 		
+		// Create the JFileChooser
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("Select the destinations.dat file to open");
 		fileChooser.setCurrentDirectory(new File("."));
+		
+		// Create an accessory panel for options and attach it to JFileChooser
+		JCheckBox cbIntersections = new JCheckBox("Label intersections");
+		//JCheckBox cbSimplify = new JCheckBox("Simplify graph");
+		JPanel optionsAccessory = new JPanel();
+		Border border = BorderFactory.createTitledBorder("Options");
+	    optionsAccessory.setBorder(border);
+		optionsAccessory.setLayout(new BoxLayout(optionsAccessory, BoxLayout.Y_AXIS));
+		optionsAccessory.add(cbIntersections);
+		//optionsAccessory.add(cbSimplify);
+		fileChooser.setAccessory(optionsAccessory);
 		
 		if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			File sourceFile = fileChooser.getSelectedFile();
@@ -84,7 +101,13 @@ public class TCConverter {
 			
 			if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
 				File destFile = fileChooser.getSelectedFile();
-			
+				
+				// These are the variables that are used when handling the options while converting
+				boolean labelIntersections = cbIntersections.isSelected();
+				//boolean simplifyGraph = cbSimplify.isSelected();
+				
+				//System.out.print(labelIntersections + " / " + simplifyGraph);
+				
 				try {
 					DataInputStream stream = new DataInputStream(new InflaterInputStream(new FileInputStream(sourceFile)));
 					PathNode[] nodes;
@@ -155,7 +178,7 @@ public class TCConverter {
 						dwriter.newLine();
 						
 						dwriter.newLine();
-						dwriter.write("    node [style=filled, shape=box, fontname=Helvetica, fontsize=14];");
+						dwriter.write("    node [width=0, height=0, margin=0, fontname=Helvetica, fontsize=14];");
 						dwriter.newLine();
 						dwriter.newLine();
 						for (PathNode node : nodes) {
@@ -166,13 +189,20 @@ public class TCConverter {
 							dwriter.write("    " + node.name + " [");
 							// Flip the z coordinate to make the graphics roughly respect the
 							// real directions (n,e,s,w)
-							dwriter.write("pos=\"" + node.x + "," + -node.z + "\"");
+							dwriter.write("pos=\"" + node.x + "," + -node.z + "\", ");
 							
-							// Switches represented as points in graph, real destinations as yellow boxes
-							if (!node.name.startsWith("JN")) {
-								dwriter.write(", fillcolor=yellow");
+							// Switches (junctions) represented as points or texts, depending on user's choice
+							if (node.name.startsWith("JN")) {
+								if (labelIntersections)
+									dwriter.write("shape=plaintext, fontsize=10");
+								else
+									dwriter.write("shape=point, width=0.1, height=0.1");
+							// Real destinations represented as yellow boxes
 							} else {
-								dwriter.write(", shape=point");
+								dwriter.write("style=filled, " +
+										      "shape=ellipse, " +
+										      "fillcolor=yellow, " +
+										      "margin=0.08");
 							}
 							dwriter.write("];");
 							dwriter.newLine();
