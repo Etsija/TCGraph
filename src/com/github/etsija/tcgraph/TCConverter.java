@@ -105,7 +105,6 @@ public class TCConverter {
 				// These are the variables that are used when handling the options while converting
 				boolean labelIntersections = cbIntersections.isSelected();
 				//boolean simplifyGraph = cbSimplify.isSelected();
-				
 				//System.out.print(labelIntersections + " / " + simplifyGraph);
 				
 				try {
@@ -182,7 +181,7 @@ public class TCConverter {
 							writer.write(node.name);
 							writer.newLine();
 							
-							dwriter.write("    " + node.name + " [");
+							dwriter.write("    \"" + node.name + "\" [");
 							// Flip the z coordinate to make the graphics roughly respect the
 							// real directions (n,e,s,w)
 							dwriter.write("pos=\"" + node.x + "," + -node.z + "\", ");
@@ -216,10 +215,10 @@ public class TCConverter {
 								
 								if (conn.shouldBeListed) {
 									if (conn.isTwoway) {
-										dwriter.write("    " + node.name + " -- " + conn.destination.name + " [" 
+										dwriter.write("    \"" + node.name + "\" -- \"" + conn.destination.name + "\" [" 
 											      + "label=" + conn.distance + "];");
 									} else {
-											dwriter.write("    " + node.name + " -- " + conn.destination.name + " ["
+											dwriter.write("    \"" + node.name + "\" -- \"" + conn.destination.name + "\" ["
 												  + "dir=\"forward\", "
 										          + "label=" + conn.distance + ", "
 										          + "color=red];");
