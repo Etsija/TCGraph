@@ -136,20 +136,16 @@ public class TCConverter {
 
 						// Read all connections
 						for (PathNode node : nodes) {
+							
 							PathConnection conn;
 							int ncount = stream.readInt();
+							
+							System.out.print(node.name + " conn: " + ncount);
 							
 							for (int i = 0; i < ncount; i++) {
 								conn = new PathConnection(stream, nodes[stream.readInt()]);
 								node.connections.add(conn);
-							}
-							
-							ncount = stream.readInt();
-							
-							for (int i = 0; i < ncount; i++) {
-								conn = new PathConnection(stream, nodes[stream.readInt()]);
-								// These are very far away connections and should be ignored
-							}
+							}							
 						}
 						
 					} finally {
