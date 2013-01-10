@@ -76,6 +76,12 @@ public class TCConverter {
 	// Main
 	public static void main(String[] args) {
 		
+		boolean useGUI = false;
+		
+		if (args.length == 0) {
+			useGUI = true;
+		}
+		
 		// Create the JFileChooser
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setDialogTitle("Select the destinations.dat file to open");
@@ -83,7 +89,6 @@ public class TCConverter {
 		
 		// Create an accessory panel for options and attach it to JFileChooser
 		JCheckBox cbIntersections = new JCheckBox("Label intersections");
-		//JCheckBox cbSimplify = new JCheckBox("Simplify graph");
 		JPanel optionsAccessory = new JPanel();
 		Border border = BorderFactory.createTitledBorder("Options");
 	    optionsAccessory.setBorder(border);
@@ -172,6 +177,7 @@ public class TCConverter {
 						dwriter.write("    node [width=0, height=0, margin=0, fontname=Helvetica, fontsize=14];");
 						dwriter.newLine();
 						dwriter.newLine();
+						int totalTracks = 0;
 						for (PathNode node : nodes) {
 							writer.write("name: ");
 							writer.write(node.name);
@@ -220,6 +226,7 @@ public class TCConverter {
 										          + "color=red];");
 									}
 									dwriter.newLine();
+									totalTracks = totalTracks + conn.distance;
 								}
 								
 								writer.write("    position: ");
@@ -235,6 +242,7 @@ public class TCConverter {
 							writer.newLine();
 							dwriter.newLine();
 						}
+						System.out.println("Total number of tracks: " + totalTracks);
 						dwriter.write("}");
 						dwriter.newLine();
 					} finally {
