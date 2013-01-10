@@ -89,7 +89,6 @@ public class TCConverter {
 	    optionsAccessory.setBorder(border);
 		optionsAccessory.setLayout(new BoxLayout(optionsAccessory, BoxLayout.Y_AXIS));
 		optionsAccessory.add(cbIntersections);
-		//optionsAccessory.add(cbSimplify);
 		fileChooser.setAccessory(optionsAccessory);
 		
 		if (fileChooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
@@ -104,8 +103,6 @@ public class TCConverter {
 				
 				// These are the variables that are used when handling the options while converting
 				boolean labelIntersections = cbIntersections.isSelected();
-				//boolean simplifyGraph = cbSimplify.isSelected();
-				//System.out.print(labelIntersections + " / " + simplifyGraph);
 				
 				try {
 					DataInputStream stream = new DataInputStream(new InflaterInputStream(new FileInputStream(sourceFile)));
@@ -126,7 +123,6 @@ public class TCConverter {
 							nodes[i].z = stream.readInt();
 						
 							if (nodes[i].name.isEmpty()) {
-								//nodes[i].name = nodes[i].getLoc();
 								nodes[i].name = "JN" + Integer.toString(j);
 								j++;
 							}
