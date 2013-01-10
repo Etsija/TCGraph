@@ -11,9 +11,8 @@ out from this program: "inputfile.txt" and "inputfile.dot".  Look into them, the
 Instructions:
 
 1. Put the jarfile into the folder where your "destinations.dat" (from plugin TrainCarts) resides
-2. Run this program (details are up to you) and choose your "destinations.dat" in the file chooser
-3. Choose output name (program suggests you one)
-4. Program outputs "destinations.txt" and "destinations.dot".  The latter one is the one which you need from this on
+2. Run this program from command line, using options if you like. "java -jar tcgraph.jar" gives you the usage
+3. Program outputs "destinations.txt" and "destinations.dot".  The latter one is the one which you need from this on
 
 5. With "dot" tool installed into your system, write on command line
 > neato -tpdf destinations.dot -o destinations.pdf
