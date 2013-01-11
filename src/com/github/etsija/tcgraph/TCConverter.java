@@ -70,6 +70,8 @@ public class TCConverter {
 		
 		int connBeforeRemoval = 0;
 		int connAfterRemoval = 0;
+		int nNodes = 0;
+		int nDestinations = 0;
 		boolean labelIntersections = false;
 		boolean debug = false;
 		File sourceFile = null;
@@ -113,7 +115,8 @@ public class TCConverter {
 				try {
 					nodes = new PathNode[stream.readInt()];
 					HashMap<String, PathNode> nodesMap = new HashMap<String, PathNode>(nodes.length);
-						
+					nNodes = nodes.length;
+					
 					// Read all node information
 					int j = 1;
 					for (int i = 0; i < nodes.length; i++) {
@@ -162,13 +165,10 @@ public class TCConverter {
 								System.out.println(node.name + " -> " + conn.destination.name 
 										+ ", istwoway=" + conn.isTwoway);
 							}
-							connAfterRemoval += 1;
+							connAfterRemoval++;
 						}
 					}
 				}
-				System.out.println("Connections in original graph: " + connBeforeRemoval);
-				System.out.println("  Two-way connections removed: " + removedConn);
-				System.out.println("   Connections in final graph: " + connAfterRemoval);
 					
 				// Start writing this info
 				BufferedWriter  writer = new BufferedWriter(new FileWriter(textFile));
@@ -205,6 +205,7 @@ public class TCConverter {
 									      "shape=ellipse, " +
 									      "fillcolor=yellow, " +
 									      "margin=0.08");
+							nDestinations++;
 						}
 						dwriter.write("];");
 						dwriter.newLine();
@@ -231,7 +232,7 @@ public class TCConverter {
 									          + "color=red];");
 								}
 								dwriter.newLine();
-								totalTracks = totalTracks + conn.distance;
+								totalTracks += conn.distance;
 							}
 								
 							writer.write("    position: ");
@@ -247,7 +248,12 @@ public class TCConverter {
 						writer.newLine();
 						dwriter.newLine();
 					}
-					System.out.println("       Total number of tracks: " + totalTracks);
+					System.out.println("Total number of nodes in graph: " + nNodes);
+					System.out.println("      ...of which destinations: " + nDestinations);
+					System.out.println(" Connections in original graph: " + connBeforeRemoval);
+					System.out.println("   Two-way connections removed: " + removedConn);
+					System.out.println("    Connections in final graph: " + connAfterRemoval);
+					System.out.println("        Total number of tracks: " + totalTracks);
 					dwriter.write("}");
 					dwriter.newLine();
 				} finally {
